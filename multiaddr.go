@@ -215,12 +215,14 @@ func Contains(addrs []Multiaddr, addr Multiaddr) bool {
 
 // Unique deduplicates addresses in place, leave only unique addresses.
 // It doesn't allocate.
-func Unique(addrs []Multiaddr) []Multiaddr {
+func Unique(addrs []multiaddr.Multiaddr) []multiaddr.Multiaddr {
 	if len(addrs) == 0 {
 		return addrs
 	}
-	// Use the new slices package here, as the sort function doesn't allocate (sort.Slice does).
-	slices.SortFunc(addrs, func(a, b Multiaddr) bool { return bytes.Compare(a.Bytes(), b.Bytes()) < 0 })
+	// Modify the comparison function to return an int
+	slices.SortFunc(addrs, func(a, b multiaddr.Multiaddr) int {
+		return bytes.Compare(a.Bytes(), b.Bytes())
+	})
 	idx := 1
 	for i := 1; i < len(addrs); i++ {
 		if !addrs[i-1].Equal(addrs[i]) {
